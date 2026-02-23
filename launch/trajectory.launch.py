@@ -33,7 +33,7 @@ def generate_launch_description():
     rvizconfig_launch_arg = DeclareLaunchArgument(
         "rvizconfig",
         default_value=os.path.join(
-            get_package_share_directory("mycobot_280pi"),
+            get_package_share_directory("cobot_unitn"),
             "config/mycobot_pi.rviz"
         )
     )

@@ -88,7 +88,34 @@ plt.axis('equal')
 
 colors = np.linspace(0, 1, q_traj.shape[0])  # This will map from 0 to 1, affecting the color scale
 
-scatter = plt.scatter(q_traj[:,1],q_traj[:,0],c=colors,cmap='coolwarm')
+scatter = plt.scatter(np.arange(q_traj.shape[0]),q_traj[:,2],c=colors,cmap='coolwarm')
 plt.colorbar(scatter)
 plt.show()
 plt.close()
+
+
+# import matplotlib.pyplot as plt
+# from mpl_toolkits.mplot3d import Axes3D
+# import numpy as np
+
+# # Generate random data for 3D scatter plot
+
+# colors = np.linspace(0, 1, q_traj.shape[0])  # This will map from 0 to 1, affecting the color scale
+
+# # Create a 3D scatter plot
+# fig = plt.figure()
+# ax = fig.add_subplot(111, projection='3d')
+
+# # Plotting the points
+# scatter = ax.scatter(q_traj[:,1], q_traj[:,0], q_traj[:,2], c=colors, cmap='coolwarm')
+
+# # Add labels
+# ax.set_xlabel('X Axis')
+# ax.set_ylabel('Y Axis')
+# ax.set_zlabel('Z Axis')
+
+# # Add a color bar (optional)
+# fig.colorbar(scatter)
+
+# # Show the plot
+# plt.show()

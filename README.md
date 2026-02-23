@@ -1,4 +1,4 @@
-# Instructions to setup the workspace
+# Instructions to setup the workspace (Raspberry Cobot)
 
 ## Create the folder of the workspace
 ```bash
@@ -29,3 +29,8 @@ source install/local_setup.bash
 ```bash
 ros2 launch cobot_unitn trajectory.launch.py
 ```
+## Cobot M5
+This code can also be used for the cobot M5. However some small changes are needed:
+- every occurrence of the serial port `AMA0` must be changed to `ACM0`. Changes must be done both in this package and in the packages supplied by the manufacturer;
+- also the baudrate `1000000` has to be changed to `115200`.
+These modifications can be made easily with VSCode search functionality.

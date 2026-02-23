@@ -11,6 +11,8 @@ from cobot_unitn.robot_utils import compute_fk,compute_control
 # Import ROS 2 message types for joint states and poses
 from sensor_msgs.msg import JointState
 from geometry_msgs.msg import Pose
+import time
+
 
 class EndEffectorController(Node):
     """
@@ -22,7 +24,7 @@ class EndEffectorController(Node):
     def __init__(self):
         super().__init__('end_effector_controller')
 
-        self.deltaT = 0.1    # Control loop time step (s)
+        self.deltaT = 0.05    # Control loop time step (s)
         self.lmb = 1e-2      # Damping factor for Jacobian pseudo-inverse
 
         # Publisher for joint target positions to be sent to the robot driver
@@ -40,6 +42,8 @@ class EndEffectorController(Node):
         self.speed = 50.0     # joint velocity for publishing (dummy constant speed)
 
         self.start_time = self.get_clock().now()
+
+        # self.old_q_d = [0] * 6
 
         # Predefine joint names for the JointState message
         self.joint_msg = JointState()
@@ -63,11 +67,12 @@ class EndEffectorController(Node):
         Callback to update current joint positions from feedback topic.
         Stores the joint positions and then unsubscribes to avoid further updates.
         """
-        self.old_q_d = list(joint_msg.position)
-        # self.old_q_d= [0]*6
+        self.old_q_d = joint_msg.position.tolist()
+        
+        self.get_logger().info(f"Current joints state: {self.old_q_d}")
+
         self.destroy_subscription(self.state_sub)
         self.get_logger().info(f"SUBSCRIBER DESTROYED")
-        self.get_logger().info(f"Current joints state: {self.old_q_d}")
 
     def trajectory_callback(self, pose_msg):
         """
@@ -91,15 +96,15 @@ class EndEffectorController(Node):
         
         ori_d = R_d.as_matrix()
 
-        self.get_logger().info(f"pos_d = {pos_d}")
-        self.get_logger().info(f"or_d = {ori_d}")
+        # self.get_logger().info(f"pos_d = {pos_d}")
+        # self.get_logger().info(f"or_d = {ori_d}")
 
-        Kp_pos =6
+        Kp_pos = 6
         Kp_ori = 1
 
         self.q_d = compute_control(self.old_q_d,pos_d,ori_d,np.eye(3)*Kp_pos,Kp_ori,self.deltaT)
 
-        self.get_logger().info(f"q_d = {self.q_d}")
+        # self.get_logger().info(f"q_d = {self.q_d}")
 
         # Prepare and publish the joint target message
         self.joint_msg.header.stamp = self.get_clock().now().to_msg()

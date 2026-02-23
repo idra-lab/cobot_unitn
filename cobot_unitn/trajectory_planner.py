@@ -32,8 +32,8 @@ class TrajectoryPlanner(Node):
 
         self.start_time = self.get_clock().now()
 
-        # Start a timer to regularly publish trajectory points (every 0.1s = 10Hz)
-        self.timer = self.create_timer(0.1, self.timer_callback)
+        # Start a timer to regularly publish trajectory points (every 0.05s = 20Hz)
+        self.timer = self.create_timer(0.05, self.timer_callback)
 
     def joint_state_callback(self, msg):
         """
@@ -61,14 +61,24 @@ class TrajectoryPlanner(Node):
         circle_numbers=2
 
         orient_d = np.array([[0,-1,0],
-                                [-1,0,0],
-                                [0,0,-1]])
+                             [-1,0,0],
+                             [0,0,-1]])
         orient_d = R.from_matrix(orient_d).as_rotvec()
+
+        pos_0 = compute_fk(self.q_ref)[:3,3]
+
+        self.get_logger().info(f"Pos_0 {pos_0}")
 
         pos_init =  np.array([0.22,0,0.033])
 
-        pos_traj = np.tile(pos_init,(30,1))
-        pos_traj = np.hstack((pos_traj, np.tile(orient_d,(pos_traj.shape[0],1))))
+        # pos_traj = np.tile(pos_init,(50,1))
+        pos_traj = np.linspace(pos_0,pos_init,50)
+
+        approaching = np.vstack((pos_traj,np.tile(pos_init,(50,1))))
+
+        # pos_traj = np.hstack(( np.vstack((pos_traj,np.tile(pos_init,(50,1)))), np.tile(orient_d,(pos_traj.shape[0],1))))
+
+        pos_traj = np.hstack((approaching, np.tile(orient_d,(approaching.shape[0],1))))
 
         circle_center = pos_traj[-1,:3] + np.array([0,radius,0])
         trajectory_circle = circle_center  + radius*np.vstack((np.sin(angles),-np.cos(angles),np.zeros(n_points))).T
@@ -90,7 +100,7 @@ class TrajectoryPlanner(Node):
         self.total_steps = self.downsampled_traj.shape[0]
 
         self.get_logger().info(f"Trajectory computed with {self.total_steps} steps.")
-        self.get_logger().info(f"Trajectory content: \n{self.downsampled_traj} ")
+        self.get_logger().info(f"Trajectory content: \n{self.downsampled_traj[:,:3]} ")
 
         np.save('x_trajectory.npy',self.raw_traj)
 

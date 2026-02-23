@@ -43,8 +43,8 @@ class MyCobotDriver(Node):
         self.mc = MyCobot280(port, str(baud), debug=False)
         time.sleep(0.05)
         self.mc.set_fresh_mode(1)  # Refresh communication mode
-        time.sleep(0.05)
-        self.mc.focus_all_servos()
+        # time.sleep(0.05)
+        # self.mc.focus_all_servos()
 
         # Create publishers:
         # - joint_pub publishes current joint angles
@@ -78,9 +78,19 @@ class MyCobotDriver(Node):
 
         # Publishes initial joint states and end-effector marker
         now = self.get_clock().now().to_msg()
-
+        
+        time.sleep(0.03)
+        if type(self.mc.get_radians()) is int: self.get_logger().info("\n READING ERROR \n")
+        # if type(self.mc.get_radians()) is int: self.get_logger().info("\n READING ERROR \n")
         # Read joint angles (in radians) from the robot
         angles = self.mc.get_radians()
+        if type(angles) is int: self.get_logger().info("\n ANGLES READING ERROR \n")
+
+        # self.mc.send_radians(angles,50)
+
+        time.sleep(0.03)
+
+
         self.joint_state_msg.header.stamp = now
         self.joint_state_msg.position = angles
         self.joint_pub.publish(self.joint_state_msg)
@@ -97,49 +107,61 @@ class MyCobotDriver(Node):
         # Publish visualization marker
         self.marker_pub.publish(self.marker_msg)
 
-        self.destroy_publisher(self.joint_pub)
+        # self.destroy_publisher(self.joint_pub)
         self.destroy_publisher(self.marker_pub)
-        # Set up periodic timer callback (10 Hz)
-        #self.timer = self.create_timer(1/10.0, self.timer_callback)
+        # Set up periodic timer callback (20 Hz)
+        self.joint_command = angles
+        self.joint_command_vel = 50
+
+        self.timer = self.create_timer(1/20., self.timer_callback)
+        self.angles = []
         
     def timer_callback(self):
         """Publishes joint states and end-effector marker"""
         now = self.get_clock().now().to_msg()
 
         # Read joint angles (in radians) from the robot
-        angles = self.mc.get_radians()
-        #angles = [0.0,0.0,0.0,0.0,0.0,0.0]
 
+        counter = 0
+        angles = 0
+        init_time = time.time()
+        while ((type(angles) is int)) and (counter < 3):
+
+            angles = self.mc.get_radians()
+            counter += 1
+        elapsed = time.time() - init_time
+        self.get_logger().info(f'\n\n\n Time elapsed : {elapsed} \n\n\n')
         self.joint_state_msg.header.stamp = now
         self.joint_state_msg.position = angles
         self.joint_pub.publish(self.joint_state_msg)
 
+        self.angles.append(angles)
+
+        send = self.mc.send_radians(self.joint_command,self.joint_command_vel)
+        self.get_logger().info(f"Send value: {send}, command {self.joint_command}")
+
         # Read Cartesian coordinates of the end-effector
-        coords = self.mc.get_coords()
+        # coords = self.mc.get_coords()
         #coords = [0.0,0.0,0.0,0.0,0.0,0.0]
-        self.marker_msg.header.stamp = now
+        # self.marker_msg.header.stamp = now
 
         # Adjust coordinate axes to ROS convention (swap x/y, invert x)
-        self.marker_msg.pose.position.x = coords[1] / 1000 * -1
-        self.marker_msg.pose.position.y = coords[0] / 1000
-        self.marker_msg.pose.position.z = coords[2] / 1000
+        # self.marker_msg.pose.position.x = coords[1] / 1000 * -1
+        # self.marker_msg.pose.position.y = coords[0] / 1000
+        # self.marker_msg.pose.position.z = coords[2] / 1000
 
-        # Publish visualization marker
-        self.marker_pub.publish(self.marker_msg)
+        # # Publish visualization marker
+        # self.marker_pub.publish(self.marker_msg)
 
     def trajectory_callback(self, msg):
         """Callback for receiving new joint target positions."""
 
-        # Send new joint positions to the robot (blocking call)
-
+        # Get new joints' position command to the robot
+        self.joint_command = list(msg.position)
+        self.joint_command_vel =  round(msg.velocity[0])
         #start_time = self.get_clock().now()
-        self.mc.send_radians(list(msg.position), round(msg.velocity[0]))
-        # end_time = self.get_clock().now()
-        # elapsed_time = (end_time - start_time).nanoseconds / 1e6  # en millisecondes
+        # self.mc.send_radians(list(msg.position), round(msg.velocity[0]))
         
-
-        #self.get_logger().info(f'Send to motors : {elapsed_time:.2f} ms')
-        #self.get_logger().info("Joint command sent to the robot")
 
     def destroy_node(self):
         # Custom cleanup before shutdown
@@ -162,9 +184,12 @@ def main(args=None):
     try:
         # Keep the node alive and responsive
         rclpy.spin(node)
+
     except KeyboardInterrupt:
         node.get_logger().info("Keyboard interrupt received. Stopping [mycobot_driver] node.")
-        node.mc.send_radians([0]*6,50)
+        node.mc.send_radians([-0.]*6,50)
+        np.save('q_meas.npy',node.angles)
+        print(node.angles)
 
         time.sleep(1.)
     finally:
