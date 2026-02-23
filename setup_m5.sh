@@ -21,6 +21,7 @@ git clone https://github.com/idra-lab/cobot_unitn
 # -----------------------------
 # Apply text replacements in Python files
 # -----------------------------
+cd ../../../..  # Go back to root (/media/Dati)
 
 # Replace AMA0 with ACM0 in all Python files
 echo "Replacing AMA0 with ACM0..."
@@ -34,7 +35,6 @@ find . -type f -name "*.py" -exec sed -i 's/1000000/115200/g' {} +
 # Create Python virtual environment and install packages
 # -----------------------------
 
-cd ../../../..  # Go back to root (/media/Dati)
 echo "Creating Python virtual environment RoboCobot..."
 python3 -m venv RoboCobot
 
