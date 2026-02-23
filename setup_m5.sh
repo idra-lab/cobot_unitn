@@ -37,7 +37,11 @@ find . -type f -name "*.py" -exec sed -i 's/1000000/115200/g' {} +
 
 cd ..
 echo "Creating Python virtual environment RoboCobot..."
-python3 -m venv RoboCobot
+conda create --prefix ./RoboCobot
+conda activate ./RoboCobot
+conda install pip
+pip install scipy
+pip install pymycobot
 
 echo "Activating virtual environment..."
 source RoboCobot/bin/activate
