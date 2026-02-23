@@ -6,8 +6,8 @@
 source /opt/ros/humble/setup.bash
 echo "Creating workspace..."
 cd /media/Dati
-mkdir -p ws_cobot/src
-cd ws_cobot/src
+mkdir -p ws_cobot_m5/src
+cd ws_cobot_m5/src
 
 # Clone main mycobot ROS2 repository
 echo "Cloning mycobot_ros2..."
@@ -48,7 +48,7 @@ pip install pymycobot
 # Build the workspace
 # -----------------------------
 
-cd ws_cobot
+cd ws_cobot_m5
 echo "Building workspace with colcon..."
 colcon build --symlink-install
 
