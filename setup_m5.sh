@@ -32,6 +32,14 @@ echo "Replacing 1000000 with 115200..."
 find . -type f -name "*.py" -exec sed -i 's/1000000/115200/g' {} +
 
 # -----------------------------
+# Build the workspace
+# -----------------------------
+
+cd ws_cobot_m5
+echo "Building workspace with colcon..."
+colcon build --symlink-install
+
+# -----------------------------
 # Create Python virtual environment and install packages
 # -----------------------------
 
@@ -43,13 +51,5 @@ conda activate ./RoboCobot
 conda install pip
 pip install scipy
 pip install pymycobot
-
-# -----------------------------
-# Build the workspace
-# -----------------------------
-
-cd ws_cobot_m5
-echo "Building workspace with colcon..."
-colcon build --symlink-install
 
 echo "Done!"
