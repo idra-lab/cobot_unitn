@@ -35,9 +35,14 @@ This code can also be used for the cobot M5. However some small changes are need
 - also the baudrate `1000000` has to be changed to `115200`.
 These modifications can be made easily with VSCode search functionality.
 
+## Virtual Machine setup
 The setup of the environment can be automatized using the shell script provided:
 ```bash 
 chmod +x setup_m5.sh
 ./setup_m5.sh
 ```
-Then remember to activate the `RoboCobot` environment with `conda activate /media/Dati/RoboCobot`.
+Then remember to activate the `RoboCobot` environment with 
+```bash
+StartConda
+conda activate /media/Dati/RoboCobot`
+```.
