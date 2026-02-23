@@ -3,7 +3,7 @@
 # -----------------------------
 # Start ROS workspace and clone repos
 # -----------------------------
-StartRos
+source /opt/ros/humble/setup.bash
 echo "Creating workspace..."
 cd /media/Dati
 mkdir -p ws_cobot/src
@@ -36,21 +36,13 @@ find . -type f -name "*.py" -exec sed -i 's/1000000/115200/g' {} +
 # -----------------------------
 
 cd ..
-echo "Creating Python virtual environment RoboCobot..."
+echo "Creating and activating Python virtual environment RoboCobot..."
+source /usr/LDSS/bin/conda.sh
 conda create --prefix ./RoboCobot
 conda activate ./RoboCobot
 conda install pip
 pip install scipy
 pip install pymycobot
-
-echo "Activating virtual environment..."
-source RoboCobot/bin/activate
-
-echo "Upgrading pip..."
-pip install --upgrade pip
-
-echo "Installing required Python packages..."
-pip install pymycobot scipy numpy
 
 # -----------------------------
 # Build the workspace
