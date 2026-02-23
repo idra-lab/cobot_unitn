@@ -34,3 +34,10 @@ This code can also be used for the cobot M5. However some small changes are need
 - every occurrence of the serial port `AMA0` must be changed to `ACM0`. Changes must be done both in this package and in the packages supplied by the manufacturer;
 - also the baudrate `1000000` has to be changed to `115200`.
 These modifications can be made easily with VSCode search functionality.
+
+The setup of the environment can be automatized using the shell script provided:
+```bash 
+chmod +x setup_m5.sh
+./setup_m5.sh
+```
+Then remember to activate the `RoboCobot` environment with `conda activate /media/Dati/RoboCobot`.
